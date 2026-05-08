@@ -839,13 +839,15 @@ Scroll Down for Diagnostics ↓
 </div>""".strip()
     st.markdown(hero_content, unsafe_allow_html=True)
 
-    # ─── CANCER SELECTOR (top row of tabs) ────────────────────
-    cancer_tab_cols = st.columns(4)
-    for i, c in enumerate(['LUNG', 'SKIN', 'PROSTATE', 'COLORECTAL']):
-        is_ac = (c == ac)
-        with cancer_tab_cols[i]:
-            if st.button(c, key=f"ctab_{c}"):
-                D.active_cancer = c; set_stage(1); D.lung_tab = 'Symptoms'; st.rerun()
+    # ─── CANCER SELECTOR (Centered & Tight) ────────────────────
+    _, tab_container, _ = st.columns([2.2, 1.6, 2.2])
+    with tab_container:
+        cancer_tab_cols = st.columns(4)
+        for i, c in enumerate(['LUNG', 'SKIN', 'PROSTATE', 'COLORECTAL']):
+            is_ac = (c == ac)
+            with cancer_tab_cols[i]:
+                if st.button(c, key=f"ctab_{c}"):
+                    D.active_cancer = c; set_stage(1); D.lung_tab = 'Symptoms'; st.rerun()
 
     # CSS-override the cancer tabs to look like proper header pills
     st.markdown(f"""
