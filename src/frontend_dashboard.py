@@ -741,10 +741,13 @@ def main():
         .vg-section-label { color: rgba(255,255,255,0.5) !important; border-top-color: rgba(255,255,255,0.1) !important; }
         .stNumberInput label, .stSlider label { color:#E2E8F0 !important; }
         
-        /* ── DARK PULL SWITCHER BULB ── */
+        /* ── DARK PULL SWITCHER CAPSULE ── */
         div[data-testid="stColumn"]:has(.pull-switch-wrapper) button {
-            background: radial-gradient(circle at center, #4b5563, #1f2937, #000) !important;
-            box-shadow: 0 0 20px 6px rgba(31,41,55,0.7) !important;
+            background: #1A1A2E !important;
+            border-radius: 100px !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            width: 80px !important;
+            height: 36px !important;
         }
         div[data-testid="stColumn"]:has(.pull-switch-wrapper)::before {
             background: #374151 !important;
@@ -1020,16 +1023,31 @@ Scroll Down for Diagnostics ↓
 
                 # Additional clinical questions
                 st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+                st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
                 section_label("Additional Risk Markers")
+                
+                def risk_capsule(label, key, help_text):
+                    is_active = pd.get(key, False)
+                    cls = "opt-pill selected" if is_active else "opt-pill"
+                    st.markdown(f"""
+                        <div class="{cls}" style="display:flex; justify-content:space-between; align-items:center; padding: 14px 20px; margin-bottom:10px;">
+                            <span style="font-size:0.85rem; font-weight:600;">{label}</span>
+                            <span style="opacity:0.4; font-size:0.8rem;">ⓘ</span>
+                        </div>
+                    """, unsafe_allow_html=True)
+                    if st.button(f"Toggle {label}", key=f"btn_{key}", help=help_text, label_visibility="collapsed"):
+                        pd[key] = not is_active
+                        st.rerun()
+
                 a1, a2 = st.columns(2)
                 with a1:
-                    pd['cancer_hist']  = st.checkbox("Prior Malignancy",          pd['cancer_hist'], help="History of any previous cancer diagnosis.")
-                    pd['copd']         = st.checkbox("COPD",                       pd['copd'], help="Chronic Obstructive Pulmonary Disease, including emphysema and chronic bronchitis.")
-                    pd['radon']        = st.checkbox("Radon Exposure",             pd['radon'], help="Prolonged exposure to radon gas, a leading cause of lung cancer.")
+                    risk_capsule("Prior Malignancy", "cancer_hist", "History of any previous cancer diagnosis.")
+                    risk_capsule("COPD", "copd", "Chronic Obstandard Pulmonary Disease.")
+                    risk_capsule("Radon Exposure", "radon", "Prolonged exposure to radon gas.")
                 with a2:
-                    pd['chest_rad']    = st.checkbox("Chest Radiation",            pd['chest_rad'], help="Previous radiation therapy to the chest area.")
-                    pd['occupational'] = st.checkbox("Occupational Carcinogens",   pd['occupational'], help="Exposure to asbestos, silica, arsenic, diesel exhaust, etc.")
-                    pd['secondary_smoke'] = st.checkbox("Secondary Smoke",         pd['secondary_smoke'], help="Regular exposure to secondhand smoke.")
+                    risk_capsule("Chest Radiation", "chest_rad", "Previous radiation therapy to the chest.")
+                    risk_capsule("Occupational Carcinogens", "occupational", "Exposure to asbestos, arsenic, etc.")
+                    risk_capsule("Secondary Smoke", "secondary_smoke", "Regular exposure to secondhand smoke.")
 
                 st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
                 n1, n2 = st.columns(2)
