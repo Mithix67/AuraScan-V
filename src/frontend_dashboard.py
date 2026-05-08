@@ -1035,7 +1035,7 @@ Scroll Down for Diagnostics ↓
                             <span style="opacity:0.4; font-size:0.8rem;">ⓘ</span>
                         </div>
                     """, unsafe_allow_html=True)
-                    if st.button(f"Toggle {label}", key=f"btn_{key}", help=help_text, label_visibility="collapsed"):
+                    if st.button(f"Toggle {label}", key=f"btn_{key}", help=help_text):
                         pd[key] = not is_active
                         st.rerun()
 
