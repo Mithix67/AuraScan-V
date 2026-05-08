@@ -712,13 +712,15 @@ def main():
             box-shadow: 0 20px 60px rgba(0,0,0,0.4) !important;
         }
         div.stButton > button { 
-            background: transparent !important;
-            color: #E2E8F0 !important; 
-            border-color: rgba(255,255,255,0.2) !important; 
+            background: rgba(255,255,255,0.03) !important;
+            color: #FFFFFF !important; 
+            border: 1px solid rgba(255,255,255,0.3) !important; 
+            border-radius: 12px !important;
         }
         div.stButton > button:hover {
-            background: #E2E8F0 !important;
+            background: #FFFFFF !important;
             color: #0D1117 !important;
+            border-color: #FFFFFF !important;
         }
         div[data-testid="stButton"] button[kind="primary"],
         div[data-testid="stButton"] button[data-testid="baseButton-primary"] {
