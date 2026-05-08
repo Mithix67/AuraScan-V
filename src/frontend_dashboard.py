@@ -839,8 +839,8 @@ Scroll Down for Diagnostics ↓
 </div>""".strip()
     st.markdown(hero_content, unsafe_allow_html=True)
 
-    # ─── CANCER SELECTOR (Centered & Tight) ────────────────────
-    _, tab_container, _ = st.columns([2.2, 1.6, 2.2])
+    # ─── CANCER SELECTOR (Centered & Perfectly Spaced) ──────────
+    _, tab_container, _ = st.columns([1.2, 3.6, 1.2])
     with tab_container:
         cancer_tab_cols = st.columns(4)
         for i, c in enumerate(['LUNG', 'SKIN', 'PROSTATE', 'COLORECTAL']):
