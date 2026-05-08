@@ -800,7 +800,7 @@ def main():
     logo_path = os.path.join(ROOT_DIR, 'src', 'assets', 'logo.png')
     logo_base64 = get_logo_base64(dm, logo_path)
             
-    hero_logo_html = f'<img src="data:image/png;base64,{logo_base64}" style="height:160px; margin-bottom:28px;">' if logo_base64 else ''
+    hero_logo_html = f'<img src="data:image/png;base64,{logo_base64}" style="height:120px; margin-bottom:28px;">' if logo_base64 else ''
     
     st.markdown(f"""
     <div style="display:flex;justify-content:space-between;align-items:center;padding:0 4px 20px 4px;">
@@ -818,7 +818,7 @@ def main():
             st.rerun()
 
     # ─── HERO SECTION ──────────────────────────────────────────
-    hero_content = f"""<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; min-height:60vh; padding: 20px; max-width: 1000px; margin: 0 auto;">
+    hero_content = f"""<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; min-height:65vh; padding: 20px; max-width: 1000px; margin: 0 auto;">
 {hero_logo_html}
 <h1 style="font-size:4.8rem; font-weight:800; letter-spacing:-2px; color:{C_TEXT}; line-height:1.1; margin-bottom:32px;">
 Next-Generation <br/><span style="background:{C_GRAD}; -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Clinical Risk Stratification</span>
