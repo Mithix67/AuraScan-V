@@ -711,16 +711,17 @@ def main():
             border: 1px solid rgba(255,255,255,0.05) !important;
             box-shadow: 0 20px 60px rgba(0,0,0,0.4) !important;
         }
-        div.stButton > button { 
-            background: rgba(255,255,255,0.03) !important;
-            color: #FFFFFF !important; 
-            border: 1px solid rgba(255,255,255,0.3) !important; 
-            border-radius: 12px !important;
+        [data-testid="stButton"] button {
+            background: rgba(255,255,255,0.08) !important;
+            color: #FFFFFF !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
         }
-        div.stButton > button:hover {
+        [data-testid="stButton"] button:hover {
             background: #FFFFFF !important;
             color: #0D1117 !important;
-            border-color: #FFFFFF !important;
+        }
+        [data-testid="stButton"] button p {
+            color: inherit !important;
         }
         div[data-testid="stButton"] button[kind="primary"],
         div[data-testid="stButton"] button[data-testid="baseButton-primary"] {
