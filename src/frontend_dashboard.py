@@ -832,7 +832,7 @@ def main():
                 }}
             </style>
         </div>
-    """)
+    """).strip()
     st.markdown(hero_content, unsafe_allow_html=True)
 
     # ─── CANCER SELECTOR (top row of tabs) ────────────────────
@@ -970,7 +970,7 @@ def main():
 </div>
 </body>
 </html>"""
-        components.html(left_html, height=600, scrolling=False)
+        st.components.v1.html(left_html, height=600, scrolling=False)
 
     # ═══ RIGHT PANEL: WHITE CARD ═══
     with col_r:
