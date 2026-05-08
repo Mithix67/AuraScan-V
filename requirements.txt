@@ -1,0 +1,15 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+pydicom
+numpy
+torch
+torchvision
+matplotlib
+SimpleITK
+scikit-learn
+opencv-python-headless
+tqdm
+pandas
+scipy
+streamlit
+seaborn
+plotly

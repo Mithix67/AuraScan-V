@@ -1,0 +1,47 @@
+# ── Python ──────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# ── Virtual Environments ─────────────────────────
+venv/
+.venv/
+env/
+
+# ── Model Weights (NEVER commit) ────────────────
+checkpoints/
+*.pth
+*.pt
+*.ckpt
+*.h5
+
+# ── Patient / Medical Data (NEVER commit) ────────
+data/
+*.dcm
+*.nii
+*.nii.gz
+*.mhd
+*.raw
+
+# ── Results & Outputs ────────────────────────────
+results/
+*.png
+*.jpg
+
+# ── Jupyter / IDE ────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+.idea/
+.vscode/
+
+# ── OS ───────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Streamlit ────────────────────────────────────
+.streamlit/secrets.toml
