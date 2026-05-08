@@ -812,27 +812,25 @@ def main():
             st.rerun()
 
     # ─── HERO SECTION ──────────────────────────────────────────
-    hero_content = textwrap.dedent(f"""
-        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; min-height:60vh; padding: 20px; max-width: 1000px; margin: 0 auto;">
-            {hero_logo_html}
-            <h1 style="font-size:4.8rem; font-weight:800; letter-spacing:-2px; color:{C_TEXT}; line-height:1.1; margin-bottom:32px;">
-                Next-Generation <br/><span style="background:{C_GRAD}; -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Clinical Risk Stratification</span>
-            </h1>
-            <p style="font-size:1.35rem; color:{C_TEXT_M}; line-height:1.7; margin-bottom:60px; font-weight:400; max-width: 800px;">
-                AuraMed is a highly specialized clinical workstation leveraging advanced neural networks and multifactorial medical logic to generate predictive risk profiles across multiple oncology domains.
-            </p>
-            <div style="display:inline-block; padding: 16px 36px; background:transparent; border: 2px solid {C_LINE}; border-radius:100px; font-size:1rem; font-weight:700; color:{C_TEXT}; letter-spacing:0.08em; text-transform:uppercase; animation: bounce 2s infinite;">
-                Scroll Down for Diagnostics ↓
-            </div>
-            <style>
-                @keyframes bounce {{
-                    0%, 20%, 50%, 80%, 100% {{ transform: translateY(0); }}
-                    40% {{ transform: translateY(-12px); }}
-                    60% {{ transform: translateY(-6px); }}
-                }}
-            </style>
-        </div>
-    """).strip()
+    hero_content = f"""<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; min-height:60vh; padding: 20px; max-width: 1000px; margin: 0 auto;">
+{hero_logo_html}
+<h1 style="font-size:4.8rem; font-weight:800; letter-spacing:-2px; color:{C_TEXT}; line-height:1.1; margin-bottom:32px;">
+Next-Generation <br/><span style="background:{C_GRAD}; -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Clinical Risk Stratification</span>
+</h1>
+<p style="font-size:1.35rem; color:{C_TEXT_M}; line-height:1.7; margin-bottom:60px; font-weight:400; max-width: 800px;">
+AuraMed is a highly specialized clinical workstation leveraging advanced neural networks and multifactorial medical logic to generate predictive risk profiles across multiple oncology domains.
+</p>
+<div style="display:inline-block; padding: 16px 36px; background:transparent; border: 2px solid {C_LINE}; border-radius:100px; font-size:1rem; font-weight:700; color:{C_TEXT}; letter-spacing:0.08em; text-transform:uppercase; animation: bounce 2s infinite;">
+Scroll Down for Diagnostics ↓
+</div>
+<style>
+@keyframes bounce {{
+0%, 20%, 50%, 80%, 100% {{ transform: translateY(0); }}
+40% {{ transform: translateY(-12px); }}
+60% {{ transform: translateY(-6px); }}
+}}
+</style>
+</div>""".strip()
     st.markdown(hero_content, unsafe_allow_html=True)
 
     # ─── CANCER SELECTOR (top row of tabs) ────────────────────
