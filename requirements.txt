@@ -4,7 +4,6 @@ numpy
 torch
 torchvision
 matplotlib
-SimpleITK
 scikit-learn
 opencv-python-headless
 tqdm
@@ -13,3 +12,4 @@ scipy
 streamlit
 seaborn
 plotly
+Pillow
