@@ -1,42 +1,80 @@
-"""
-Model Evaluation & Metrics — AuraScan Showcase Version
-
-NOTE: This file shows the evaluation framework used in the full system.
-The implementation is omitted. See TECHNICAL_OVERVIEW.md and results_analysis.md.
-"""
-
+import torch
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix, classification_report, roc_auc_score
 
 
 def evaluate_model(model, dataloader, device):
     """
-    Scientifically evaluates the 3D CNN on a held-out test set.
-
-    Evaluation Steps:
-        1. Sets model to eval() mode and disables gradient computation.
-        2. Runs all batches through the model, collecting predictions and probabilities.
-        3. Reports performance at the default 0.5 threshold.
-        4. Computes AUC-ROC and finds the optimal threshold using Youden's J statistic.
-        5. Saves Confusion Matrix and ROC Curve plots to `checkpoints/`.
-
-    Parameters:
-        model (NoduleClassifier3D): Trained PyTorch model.
-        dataloader (DataLoader):    Test set DataLoader.
-        device (torch.device):      'cuda' or 'cpu'.
-
-    Returns:
-        tuple:
-            - confusion_matrix (np.ndarray): 2x2 matrix at optimal threshold.
-            - all_probs (np.ndarray):        Raw sigmoid probabilities for all samples.
-            - optimal_threshold (float):     Best threshold from Youden's J analysis.
-
-    Reported Metrics:
-        - Accuracy, Sensitivity (Recall), Specificity at threshold 0.5.
-        - AUC-ROC Score.
-        - Rebalanced Accuracy, Sensitivity, Specificity at Youden's optimal threshold.
-
-    Output Files:
-        - checkpoints/confusion_matrix.png
-        - checkpoints/roc_curve.png
+    Evaluates model on a DataLoader. Reports metrics at 0.5 threshold
+    and finds the optimal threshold using Youden's J statistic.
     """
-    raise NotImplementedError("Implementation omitted in showcase version.")
+    model.eval()
+    all_preds, all_labels, all_probs = [], [], []
+
+    print("Running Evaluation...")
+    with torch.no_grad():
+        for inputs, labels in dataloader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            probs = outputs.cpu().numpy()
+            preds = (probs > 0.5).astype(int)
+            all_probs.extend(probs)
+            all_preds.extend(preds)
+            all_labels.extend(labels.cpu().numpy())
+
+    all_labels = np.array(all_labels)
+    all_preds  = np.array(all_preds)
+    all_probs  = np.array(all_probs)
+
+    # --- Default 0.5 threshold report ---
+    print("\n--- PERFORMANCE REPORT (Threshold 0.5) ---")
+    print(classification_report(all_labels, all_preds, target_names=['Benign', 'Malignant']))
+
+    cm = confusion_matrix(all_labels, all_preds)
+    tn, fp, fn, tp = cm.ravel()
+    sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0
+    specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+    accuracy    = (tp + tn) / (tp + tn + fp + fn)
+    print(f"Accuracy:    {accuracy:.4f}")
+    print(f"Sensitivity: {sensitivity:.4f}")
+    print(f"Specificity: {specificity:.4f}")
+
+    # Confusion matrix plot
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                xticklabels=['Benign','Malignant'], yticklabels=['Benign','Malignant'])
+    plt.title('Nodule Classification Confusion Matrix'); plt.ylabel('Ground Truth'); plt.xlabel('Prediction')
+    plt.savefig('checkpoints/confusion_matrix.png')
+    print("Saved: checkpoints/confusion_matrix.png")
+
+    # --- AUC-ROC & Optimal Threshold ---
+    if len(np.unique(all_labels)) > 1:
+        from sklearn.metrics import roc_curve
+        auc = roc_auc_score(all_labels, all_probs)
+        print(f"\nAUC-ROC: {auc:.4f}")
+
+        fpr, tpr, thresholds = roc_curve(all_labels, all_probs)
+
+        # Youden's J — optimal threshold selection
+        # [Full threshold calibration logic omitted from showcase]
+        j_scores = tpr - fpr
+        best_idx = np.argmax(j_scores)
+        optimal_threshold = thresholds[best_idx]
+        print(f"Optimal Threshold (Youden's J): {optimal_threshold:.4f}")
+
+        # ROC plot
+        plt.figure()
+        plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'AUC = {auc:.2f}')
+        plt.plot([0,1],[0,1], color='navy', lw=2, linestyle='--')
+        plt.scatter([fpr[best_idx]], [tpr[best_idx]], marker='o', color='red', label='Optimal')
+        plt.xlabel('False Positive Rate'); plt.ylabel('True Positive Rate')
+        plt.title('ROC Curve'); plt.legend(loc="lower right")
+        plt.savefig('checkpoints/roc_curve.png')
+        print("Saved: checkpoints/roc_curve.png")
+
+        return cm, all_probs, optimal_threshold
+    else:
+        print("AUC-ROC: N/A (need both classes in test set)")
+        return cm, all_probs, 0.5

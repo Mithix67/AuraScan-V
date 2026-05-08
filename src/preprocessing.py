@@ -1,106 +1,88 @@
-"""
-CT Scan Preprocessing Pipeline — AuraScan Showcase Version
-
-NOTE: This file shows the full pipeline interface used in the system.
-The implementation bodies have been omitted. See TECHNICAL_OVERVIEW.md for details.
-"""
-
 import os
 import numpy as np
+import scipy.ndimage
+
+# ── HU windowing values (scanner-calibrated, omitted here) ──
+HU_MIN = None  # Configured in private config_settings.py
+HU_MAX = None  # Configured in private config_settings.py
+IMG_SIZE = 256
 
 
 def load_ct_scan(path):
     """
-    Loads a CT scan from a directory of DICOM (.dcm) files.
-
-    Process:
-        1. Reads all .dcm files in the given directory using pydicom.
-        2. Sorts slices by their Z-axis position (ImagePositionPatient[2]).
-        3. Calculates and assigns the correct SliceThickness to each slice.
-
-    Parameters:
-        path (str): Path to a directory containing DICOM files for a single patient scan.
-
-    Returns:
-        list[pydicom.FileDataset]: Sorted list of DICOM slice objects.
+    Loads a CT scan from a directory of DICOM files.
+    Sorts slices by Z-axis ImagePositionPatient and computes SliceThickness.
     """
-    raise NotImplementedError("Implementation omitted in showcase version.")
+    import pydicom
+    slices = [pydicom.read_file(os.path.join(path, s))
+              for s in os.listdir(path) if s.endswith('.dcm')]
+    slices.sort(key=lambda x: float(x.ImagePositionPatient[2]))
+    try:
+        slice_thickness = abs(slices[0].ImagePositionPatient[2] - slices[1].ImagePositionPatient[2])
+    except Exception:
+        slice_thickness = abs(slices[0].SliceLocation - slices[1].SliceLocation)
+    for s in slices:
+        s.SliceThickness = slice_thickness
+    return slices
 
 
 def get_pixels_hu(slices):
     """
-    Converts raw pixel data to Hounsfield Units (HU).
-
-    HU Scale Reference:
-        Air:          ~ -1000 HU
-        Lung tissue:  ~ -500 HU
-        Soft tissue:  ~  40 HU
-        Bone:         ~ +400 to +1000 HU
-
-    Process:
-        1. Stacks pixel arrays from all slices into a 3D NumPy array.
-        2. Applies the RescaleSlope and RescaleIntercept DICOM tags.
-        3. Replaces padding value (-2000) with 0.
-
-    Parameters:
-        slices (list[pydicom.FileDataset]): Sorted DICOM slice objects.
-
-    Returns:
-        np.ndarray (int16): 3D array in Hounsfield Units, shape (num_slices, H, W).
+    Converts raw DICOM pixel arrays to Hounsfield Units (HU).
+    Applies RescaleSlope and RescaleIntercept from DICOM metadata.
     """
-    raise NotImplementedError("Implementation omitted in showcase version.")
+    image = np.stack([s.pixel_array for s in slices]).astype(np.int16)
+    image[image == -2000] = 0  # Replace padding value
+    intercept = slices[0].RescaleIntercept
+    slope     = slices[0].RescaleSlope
+    if slope != 1:
+        image = (slope * image.astype(np.float64)).astype(np.int16)
+    image += np.int16(intercept)
+    return np.array(image, dtype=np.int16)
 
 
 def normalize(image):
     """
-    Normalizes a HU image to the [0.0, 1.0] range using clinical HU windowing.
-
-    The HU window (HU_MIN, HU_MAX) is configured in config_settings.py and
-    is calibrated for lung tissue visibility:
-        - Values below HU_MIN are clipped to 0.0 (air / empty space).
-        - Values above HU_MAX are clipped to 1.0 (dense tissue / bone).
-
-    Parameters:
-        image (np.ndarray): 3D array in Hounsfield Units.
-
-    Returns:
-        np.ndarray (float32): Normalized 3D array in range [0.0, 1.0].
+    Normalizes HU image to [0, 1] using the clinical lung window.
+    HU_MIN / HU_MAX are loaded from private config — omitted here.
     """
-    raise NotImplementedError("Implementation omitted in showcase version.")
+    if HU_MIN is None or HU_MAX is None:
+        raise RuntimeError(
+            "HU_MIN and HU_MAX are not configured. "
+            "These values are omitted from the showcase version."
+        )
+    image = (image - HU_MIN) / (HU_MAX - HU_MIN)
+    image = np.clip(image, 0, 1)
+    return image
 
 
-def resize_volume(image, desired_depth=64, desired_width=128, desired_height=128):
+def resize_volume(image, desired_depth=64, desired_width=IMG_SIZE, desired_height=IMG_SIZE):
     """
-    Resizes a 3D CT volume to the target dimensions using trilinear interpolation.
-
-    Uses scipy.ndimage.zoom to compute the per-axis scaling factor automatically,
-    ensuring consistent input size for the model regardless of scanner resolution.
-
-    Parameters:
-        image (np.ndarray):    3D normalized CT volume, shape (D, H, W).
-        desired_depth (int):   Target number of slices (Z-axis).
-        desired_width (int):   Target width in pixels.
-        desired_height (int):  Target height in pixels.
-
-    Returns:
-        np.ndarray: Resized 3D volume of shape (desired_depth, desired_width, desired_height).
+    Resizes a 3D CT volume to target dimensions using scipy trilinear interpolation.
     """
-    raise NotImplementedError("Implementation omitted in showcase version.")
+    d, w, h = image.shape
+    return scipy.ndimage.zoom(
+        image,
+        (desired_depth / d, desired_width / w, desired_height / h),
+        order=1
+    )
 
 
 def preprocess_ct_scan(path):
     """
-    Full end-to-end preprocessing pipeline for a single CT scan directory.
-
-    Pipeline Steps:
-        1. load_ct_scan(path)   → Load and sort DICOM slices.
-        2. get_pixels_hu(slices)→ Convert to Hounsfield Units.
-        3. normalize(pixels)    → Scale to [0, 1] for model consumption.
-
-    Parameters:
-        path (str): Path to a directory containing DICOM files for a patient.
-
-    Returns:
-        np.ndarray (float32): Preprocessed 3D volume ready for inference.
+    Full pipeline: load DICOM → convert to HU → normalize.
+    normalize() requires HU_MIN/HU_MAX from private config.
     """
-    raise NotImplementedError("Implementation omitted in showcase version.")
+    slices = load_ct_scan(path)
+    pixels = get_pixels_hu(slices)
+    return normalize(pixels)
+
+
+if __name__ == "__main__":
+    import sys
+    path = sys.argv[1] if len(sys.argv) > 1 else "data/raw/example_patient"
+    if os.path.exists(path):
+        scan = preprocess_ct_scan(path)
+        print(f"Processed shape: {scan.shape}, range: [{scan.min():.3f}, {scan.max():.3f}]")
+    else:
+        print("No DICOM folder found. Pass a path as argument.")
